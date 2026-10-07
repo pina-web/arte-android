@@ -50,8 +50,36 @@ public class MainActivity extends Activity {
 
         WebView.setWebContentsDebuggingEnabled(false);
 
-        web.setWebViewClient(new WebViewClient());
+        web.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView v, android.webkit.WebResourceRequest req) {
+                String url = req.getUrl().toString();
+                if (url.startsWith("http://") || url.startsWith("https://")) {
+                    openExternal(url);
+                    return true;
+                }
+                return false;
+            }
+        });
+        s.setSupportMultipleWindows(true);
         web.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onCreateWindow(WebView v, boolean dialog, boolean gesture,
+                                          android.os.Message resultMsg) {
+                WebView tmp = new WebView(MainActivity.this);
+                tmp.setWebViewClient(new WebViewClient() {
+                    @Override
+                    public boolean shouldOverrideUrlLoading(WebView vv,
+                            android.webkit.WebResourceRequest req) {
+                        openExternal(req.getUrl().toString());
+                        return true;
+                    }
+                });
+                ((android.webkit.WebView.WebViewTransport) resultMsg.obj).setWebView(tmp);
+                resultMsg.sendToTarget();
+                return true;
+            }
+
             @Override
             public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> cb,
                                              FileChooserParams params) {
@@ -71,6 +99,17 @@ public class MainActivity extends Activity {
 
         web.addJavascriptInterface(new Saver(), "AndroidSave");
         web.loadUrl("file:///android_asset/index.html");
+    }
+
+    /** 바깥 주소는 기본 브라우저로 넘긴다. */
+    private void openExternal(String url) {
+        try {
+            Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+        } catch (Exception e) {
+            Toast.makeText(this, "열 수 있는 브라우저가 없습니다", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -115,6 +154,13 @@ public class MainActivity extends Activity {
             } catch (Exception e) {
                 toast("저장에 실패했습니다: " + e.getMessage());
             }
+        }
+
+        @JavascriptInterface
+        public void openUrl(final String url) {
+            runOnUiThread(new Runnable() {
+                public void run() { openExternal(url); }
+            });
         }
 
         private void toast(final String msg) {
