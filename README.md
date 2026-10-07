@@ -43,7 +43,7 @@ APK는 깃허브가 자동으로 만들어 줍니다. 컴퓨터에 아무것도 
 - 도면 항목을 누르면 왼쪽에 사진이 뜨고, 오른쪽 견적 칸이 그 품목으로 넘어갑니다.
 - 자필 서명은 손가락과 스타일러스 모두 됩니다.
 - 계약서를 만들면 **내 파일 > 다운로드 > 아르떼계약서** 에 엑셀과 이미지가 저장됩니다.
-- 아래 툴바의 **해피톡 열기** 를 누르면 해피톡(https://www.happytalk.io/)이
+- 아래 툴바의 **해피톡 열기** 를 누르면 해피톡(https://counselor.happytalk.io/auth/login)이
   휴대폰 기본 브라우저에서 열립니다. 앱 안이 아니라 브라우저에서 열리므로
   크롬에 해 둔 로그인이 그대로 쓰입니다.
 
@@ -81,7 +81,7 @@ versionName "1.0"  ← "1.1" 처럼 보기 좋게 (아무 글자나 됩니다)
 | 앱 이름 | `app/src/main/res/values/strings.xml` 의 `app_name` |
 | 앱 아이콘 | `app/src/main/res/drawable/ic_launcher_fg.xml` |
 | 저장 폴더 이름 | `MainActivity.java` 의 `"아르떼계약서"` |
-| 해피톡 주소 | `index.html` 의 `https://www.happytalk.io/` |
+| 해피톡 주소 | `index.html` 의 `https://counselor.happytalk.io/auth/login` |
 
 ### 빌드가 실패하면
 
