@@ -18,19 +18,32 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: 안드로이드 SDK 준비
-        uses: android-actions/setup-android@v3
+      - name: 안드로이드 SDK 확인
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          if [ -z "$SDK" ] || [ ! -d "$SDK" ]; then
+            echo "러너에 SDK 가 없습니다. 내려받습니다."
+            SDK="$HOME/android-sdk"
+            mkdir -p "$SDK/cmdline-tools"
+            curl -fsSL -o /tmp/cmdline.zip \
+              https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+            unzip -q /tmp/cmdline.zip -d "$SDK/cmdline-tools"
+            mv "$SDK/cmdline-tools/cmdline-tools" "$SDK/cmdline-tools/latest"
+          fi
+          echo "ANDROID_HOME=$SDK" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$SDK" >> $GITHUB_ENV
+          echo "sdk.dir=$SDK" > local.properties
+          yes | "$SDK"/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
 
       - name: 그래들 준비
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
 
-      - name: 디버그 APK 빌드
-        run: gradle assembleDebug --no-daemon
-
-      - name: 배포용 APK 빌드
-        run: gradle assembleRelease --no-daemon
+      - name: APK 빌드
+        run: gradle assembleDebug assembleRelease --no-daemon --stacktrace
 
       - name: APK 올리기
         uses: actions/upload-artifact@v4
